@@ -1,6 +1,7 @@
 package com.kason.spring.custom.webmvc;
 
 import com.kason.spring.custom.annotation.*;
+import com.kason.spring.custom.context.HApplicationContext;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -39,7 +40,7 @@ public class HDispatcherServlet extends HttpServlet {
         }
         Method method = urlMethodMapper.get(requestURL);
 
-        Object bean = beanMap.get(Introspector.decapitalize(method.getDeclaringClass().getSimpleName()));
+        Object bean = context.getBean(Introspector.decapitalize(method.getDeclaringClass().getSimpleName()));
         int i = 0;
         Map<String, String[]> parameterValueMap = req.getParameterMap();
 
@@ -76,33 +77,18 @@ public class HDispatcherServlet extends HttpServlet {
 //        }
 
     }
-
+    HApplicationContext context;
     @Override
     public void init(ServletConfig config) throws ServletException {
         System.out.println("servet Init");
 
+
         String configLocation = config.getInitParameter("contextConfigLocation");
-        System.out.println("config path " + configLocation);
-        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(configLocation);
+        context = new HApplicationContext(configLocation);
 
-        Properties p = new Properties();
-        String basePackage = "";
-        try {
-            p.load(resourceAsStream);
-            basePackage = (String)p.get("basePackage");
-            System.out.println("scan base package " + basePackage);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        doIOC(basePackage);
-
+        //doIOC(basePackage);
         // 依赖注入
-        doDI();
-        beanMap.forEach((k,v) -> {
-            System.out.println("bean name " + k + " bean instance " + v);
-        });
-
+        //doDI();
         //bindHandlerMapping
         bindHandlerMapping();
         super.init(config);
@@ -111,13 +97,13 @@ public class HDispatcherServlet extends HttpServlet {
     Map<String, Method> urlMethodMapper = new HashMap<>();
     // url -> method
     private void bindHandlerMapping() {
-        beanMap.forEach((beanName, beanInstance) -> {
+        context.getBeanClass().forEach(beanClass -> {
 
-            if (beanInstance.getClass().isAnnotationPresent(HRequestMapping.class)) {
-                HRequestMapping requestMappingAnnotation = beanInstance.getClass().getDeclaredAnnotation(HRequestMapping.class);
+            if (beanClass.isAnnotationPresent(HRequestMapping.class)) {
+                HRequestMapping requestMappingAnnotation = beanClass.getDeclaredAnnotation(HRequestMapping.class);
                 String requestUrl = requestMappingAnnotation.value();
 
-                Method[] beanMethods = beanInstance.getClass().getDeclaredMethods();
+                Method[] beanMethods = beanClass.getDeclaredMethods();
                 for (Method beanMethod : beanMethods) {
                     if (beanMethod.isAnnotationPresent(HRequestMapping.class)) {
                         HRequestMapping requestMappingMethodAnnotation = beanMethod.getDeclaredAnnotation(HRequestMapping.class);
@@ -130,7 +116,7 @@ public class HDispatcherServlet extends HttpServlet {
         });
     }
 
-    private void doDI() {
+    /*private void doDI() {
 
         beanMap.forEach((beanName, beanInstance) -> {
 
@@ -158,10 +144,10 @@ public class HDispatcherServlet extends HttpServlet {
 
         });
 
-    }
+    }*/
 
-    ConcurrentMap<String, Object> beanMap = new ConcurrentHashMap<>();
-    private void doIOC(String basePackage) {
+    //ConcurrentMap<String, Object> beanMap = new ConcurrentHashMap<>();
+    /*private void doIOC(String basePackage) {
         URL resource = this.getClass().getClassLoader().getResource(basePackage.replace(".", "/"));
         assert resource != null;
         File file = new File(resource.getFile());
@@ -208,9 +194,9 @@ public class HDispatcherServlet extends HttpServlet {
                 throw new RuntimeException(e);
             }
         }
-    }
+    }*/
 
-    List<String> classFiles = new ArrayList<>();
+    /*List<String> classFiles = new ArrayList<>();
     private void scan(File file, String basePackage) {
         if (file.isDirectory()) {
             for (File f : Objects.requireNonNull(file.listFiles())) {
@@ -223,5 +209,5 @@ public class HDispatcherServlet extends HttpServlet {
             classFiles.add(basePackage);
         }
 
-    }
+    }*/
 }

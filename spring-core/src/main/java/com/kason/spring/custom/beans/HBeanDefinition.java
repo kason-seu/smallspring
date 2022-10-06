@@ -5,7 +5,7 @@ public class HBeanDefinition {
     private String beanName;
     private Class<?> beanClass;
 
-    private String beanClassName;
+    private String beanClassName; // 如果是接口，则指的是实现的名字
 
     public boolean isLazyInit() {
         return false;
