@@ -1,6 +1,8 @@
 package com.kason.spring.custom.context;
 
 import com.kason.spring.custom.annotation.HAutowired;
+import com.kason.spring.custom.aop.HAdviseSupport;
+import com.kason.spring.custom.aop.HAopConfig;
 import com.kason.spring.custom.beans.HBeanDefinition;
 import com.kason.spring.custom.beans.HBeanDefinitionReader;
 import com.kason.spring.custom.beans.HBeanFactory;
@@ -19,14 +21,18 @@ import java.util.stream.Collectors;
 public class HApplicationContext implements HBeanFactory {
     private String configLocation;
     private List<HBeanDefinition> beanDefinitions;
+    private HBeanDefinitionReader beanDefinitionReader;
     public HApplicationContext(String configLocation) {
         this.configLocation = configLocation;
         System.out.println("config location " + configLocation);
 
         String scanPackage = doParseConfig(configLocation);
-        HBeanDefinitionReader beanDefinitionReader = new HBeanDefinitionReader(scanPackage);
+        beanDefinitionReader = new HBeanDefinitionReader(scanPackage);
         beanDefinitions = beanDefinitionReader.getBeanDefinitions();
         createBean(beanDefinitions);
+
+
+
         populateBean();
         System.out.println("=====");
     }
@@ -85,7 +91,14 @@ public class HApplicationContext implements HBeanFactory {
                     beanOriginMap.put(beanDefinition.getBeanName(), bean);
                 } else {
                     try {
-                        beanOriginMap.put(beanDefinition.getBeanName(), beanDefinition.getBeanClass().getDeclaredConstructor().newInstance());
+                        Object beanObj = beanDefinition.getBeanClass().getDeclaredConstructor().newInstance();
+                        List<HAopConfig> hAopConfigs = beanDefinitionReader.gethAopConfigs();
+                        HAdviseSupport hAdviseSupport = new HAdviseSupport(beanObj, beanDefinition.getBeanClass(), hAopConfigs);
+                        if (hAdviseSupport.pointCutMatchClass()) {
+                            System.out.println("符合切面逻辑，需要生成动态代理对象");
+                        }
+
+                        beanOriginMap.put(beanDefinition.getBeanName(), beanObj);
                     } catch (InstantiationException e) {
                         throw new RuntimeException(e);
                     } catch (IllegalAccessException e) {

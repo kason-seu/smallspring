@@ -1,11 +1,14 @@
 com/kason/app/service/UserService.class
+com/kason/spring/custom/aop/HAdviseSupport.class
 com/kason/spring/custom/annotation/HAspect.class
 com/kason/app/controller/UserController.class
+com/kason/app/aspect/LogAspect.class
 com/kason/spring/custom/annotation/HRequestMapping.class
 com/kason/spring/custom/beans/HBeanWrapper.class
 com/kason/spring/custom/annotation/HService.class
 com/kason/spring/custom/beans/HBeanFactory.class
 com/kason/spring/custom/annotation/HAfterThrowing.class
+com/kason/spring/custom/aop/HAopConfig.class
 com/kason/spring/custom/annotation/HAutowired.class
 com/kason/spring/custom/webmvc/HDispatcherServlet.class
 com/kason/app/service/impl/UserServiceImpl.class
@@ -16,3 +19,4 @@ com/kason/spring/custom/beans/HBeanDefinition.class
 com/kason/spring/custom/annotation/HAfterReturning.class
 com/kason/spring/custom/annotation/HBefore.class
 com/kason/spring/custom/annotation/HRequestParam.class
+com/kason/spring/custom/annotation/HAround.class
