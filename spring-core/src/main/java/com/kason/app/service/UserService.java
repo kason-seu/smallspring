@@ -1,4 +1,4 @@
-package com.kason.spring.custom.service;
+package com.kason.app.service;
 
 public interface UserService {
     String hello();

@@ -1,10 +1,10 @@
-package com.kason.spring.custom.controller;
+package com.kason.app.controller;
 
 import com.kason.spring.custom.annotation.HAutowired;
 import com.kason.spring.custom.annotation.HController;
 import com.kason.spring.custom.annotation.HRequestMapping;
 import com.kason.spring.custom.annotation.HRequestParam;
-import com.kason.spring.custom.service.UserService;
+import com.kason.app.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
