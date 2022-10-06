@@ -1,23 +1,22 @@
 package com.kason.spring.custom.webmvc;
 
-import com.kason.spring.custom.annotation.*;
+import com.kason.spring.custom.annotation.HRequestMapping;
+import com.kason.spring.custom.annotation.HRequestParam;
 import com.kason.spring.custom.context.HApplicationContext;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.beans.Introspector;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.*;
-import java.net.URL;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HDispatcherServlet extends HttpServlet {
 

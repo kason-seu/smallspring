@@ -5,6 +5,7 @@ import com.kason.spring.custom.annotation.HService;
 
 import java.beans.Introspector;
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,32 +42,14 @@ public class HBeanDefinitionReader {
             if (beanClass.isAnnotationPresent(HController.class)) {
 
                 HController hControllerAnnotation = beanClass.getDeclaredAnnotation(HController.class);
-                String beanName = hControllerAnnotation.value();
-                if (beanName == null || beanName.equals("")) {
-                    beanName = Introspector.decapitalize(beanClass.getSimpleName());
-                }
-                HBeanDefinition hBeanDefinition = new HBeanDefinition();
-                hBeanDefinition.setBeanName(beanName);
-                hBeanDefinition.setBeanClassName(Introspector.decapitalize(beanClass.getSimpleName()));
-                hBeanDefinition.setBeanClass(beanClass);
-                beanDefinitions.add(hBeanDefinition);
+                createBeanDefiniton(beanClass, hControllerAnnotation.value(), hControllerAnnotation);
             } else if (beanClass.isAnnotationPresent(HService.class)) {
                 HService hServiceAnnotation = beanClass.getDeclaredAnnotation(HService.class);
-                String beanName = hServiceAnnotation.value();
-                if (beanName == null || beanName.equals("")) {
-                    beanName = Introspector.decapitalize(beanClass.getSimpleName());
-                }
-                HBeanDefinition hBeanDefinition = new HBeanDefinition();
-                hBeanDefinition.setBeanName(beanName);
-                hBeanDefinition.setBeanClassName(Introspector.decapitalize(beanClass.getSimpleName()));
-                hBeanDefinition.setBeanClass(beanClass);
-                beanDefinitions.add(hBeanDefinition);
+                String beanName = createBeanDefiniton(beanClass, hServiceAnnotation.value(), hServiceAnnotation);
                 Type[] genericInterfaces = beanClass.getGenericInterfaces();
                 // 获取该类继承的所有接口，因为可能会继承多个接口，所以返回的是数组
                 for (Type genericInterface : genericInterfaces) {
                     HBeanDefinition beanDefinition = new HBeanDefinition();
-                    String typeName = genericInterface.getTypeName();
-                    System.out.println("类型名称");
                     beanDefinition.setBeanName(Introspector.decapitalize(((Class<?>) genericInterface).getSimpleName()));
                     beanDefinition.setBeanClassName(beanName);
                     beanDefinition.setBeanClass(beanClass);
@@ -75,6 +58,19 @@ public class HBeanDefinitionReader {
             }
 
         }
+    }
+
+    private String createBeanDefiniton(Class<?> beanClass, String beanName, Annotation hServiceAnnotation) {
+        //String beanName = value;
+        if (beanName == null || beanName.equals("")) {
+            beanName = Introspector.decapitalize(beanClass.getSimpleName());
+        }
+        HBeanDefinition hBeanDefinition = new HBeanDefinition();
+        hBeanDefinition.setBeanName(beanName);
+        hBeanDefinition.setBeanClassName(Introspector.decapitalize(beanClass.getSimpleName()));
+        hBeanDefinition.setBeanClass(beanClass);
+        beanDefinitions.add(hBeanDefinition);
+        return beanName;
     }
 
     private void recursiveScan(File file, String basePackage) {

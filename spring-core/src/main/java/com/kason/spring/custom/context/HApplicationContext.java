@@ -28,6 +28,7 @@ public class HApplicationContext implements HBeanFactory {
         beanDefinitions = beanDefinitionReader.getBeanDefinitions();
         createBean(beanDefinitions);
         populateBean();
+        System.out.println("=====");
     }
 
     private void populateBean() {
