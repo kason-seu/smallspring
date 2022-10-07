@@ -1,8 +1,11 @@
 package com.kason.spring.custom.context;
 
+import com.kason.app.service.interfaces.UserService;
 import com.kason.spring.custom.annotation.HAutowired;
 import com.kason.spring.custom.aop.HAdviseSupport;
 import com.kason.spring.custom.aop.HAopConfig;
+import com.kason.spring.custom.aop.HJDKDynamicAopProxy;
+import com.kason.spring.custom.aop.HJDKDynamicAopProxyHandler;
 import com.kason.spring.custom.beans.HBeanDefinition;
 import com.kason.spring.custom.beans.HBeanDefinitionReader;
 import com.kason.spring.custom.beans.HBeanFactory;
@@ -12,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,7 +59,7 @@ public class HApplicationContext implements HBeanFactory {
                     }
                     beanField.setAccessible(true);
                     try {
-                        beanField.set(beanInstance, fieldInstance);
+                        beanField.set(beanInstance, (UserService)fieldInstance);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
@@ -86,19 +90,38 @@ public class HApplicationContext implements HBeanFactory {
         beanDefinitions.forEach(beanDefinition -> {
             Object beanInstance = beanOriginMap.get(beanDefinition.getBeanName());
             if (beanInstance == null) {
-                Object bean = beanOriginMap.get(beanDefinition.getBeanClassName());
-                if (bean != null) {
-                    beanOriginMap.put(beanDefinition.getBeanName(), bean);
-                } else {
+               // Object bean = beanOriginMap.get(beanDefinition.getBeanClassName());
+//                if (bean != null) {
+//                    beanOriginMap.put(beanDefinition.getBeanName(), bean);
+//                } else {
                     try {
                         Object beanObj = beanDefinition.getBeanClass().getDeclaredConstructor().newInstance();
                         List<HAopConfig> hAopConfigs = beanDefinitionReader.gethAopConfigs();
                         HAdviseSupport hAdviseSupport = new HAdviseSupport(beanObj, beanDefinition.getBeanClass(), hAopConfigs);
-                        if (hAdviseSupport.pointCutMatchClass()) {
+                        if (hAdviseSupport.pointCutMatchClass() && !beanDefinition.getBeanName().endsWith("Impl")) {
                             System.out.println("符合切面逻辑，需要生成动态代理对象");
+                            hAdviseSupport.methodAndAdviceMapping();
+                            // 将代理bean存放进去
+                            if (beanObj.getClass().getInterfaces().length > 0) {
+                                        Class<?>[] interfaces1 = null;
+        try {
+            Class<?> aClass = Class.forName("com.kason.app.service.impl.UserServiceImpl");
+            interfaces1 = aClass.getInterfaces();
+            System.out.println(interfaces1.length);
+            System.out.println(interfaces1[0].getName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+                                //HJDKDynamicAopProxy hjdkDynamicAopProxy = new HJDKDynamicAopProxy(beanObj.getClass(), hAdviseSupport, interfaces1);
+                                //UserService proxy =  (UserService) hjdkDynamicAopProxy.getProxy();
+                                //beanOriginMap.put(beanDefinition.getBeanName(), proxy);
+                                Class<?>[] interfaces = beanObj.getClass().getInterfaces();
+                                beanOriginMap.put(beanDefinition.getBeanName(),Proxy.newProxyInstance(beanObj.getClass().getClassLoader(), interfaces,
+                                        new HJDKDynamicAopProxyHandler(beanObj, hAdviseSupport, beanObj.getClass())));
+                            }
+                        } else {
+                            beanOriginMap.put(beanDefinition.getBeanName(), beanObj);
                         }
-
-                        beanOriginMap.put(beanDefinition.getBeanName(), beanObj);
                     } catch (InstantiationException e) {
                         throw new RuntimeException(e);
                     } catch (IllegalAccessException e) {
@@ -108,7 +131,7 @@ public class HApplicationContext implements HBeanFactory {
                     } catch (NoSuchMethodException e) {
                         throw new RuntimeException(e);
                     }
-                }
+               // }
 
             }
         });

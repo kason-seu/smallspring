@@ -9,17 +9,17 @@ import com.kason.spring.custom.annotation.HBefore;
 public class LogAspect {
 
 
-    @HBefore(value = "com.kason.app.service")
-    private void before() {
+    @HBefore(value = "com.kason.app.service.impl")
+    public void before() {
         System.out.println("执行切面Before逻辑");
     }
-    @HAfterReturning(value = "com.kason.app.service")
-    private void afterReturn() {
+    @HAfterReturning(value = "com.kason.app.service.impl")
+    public void afterReturn() {
         System.out.println("执行切面HAfterReturning逻辑");
     }
 
-    @HAfterThrowing(value = "com.kason.app.service")
-    private void afterThrow() {
+    @HAfterThrowing(value = "com.kason.app.service.impl")
+    public void afterThrow() {
         System.out.println("执行切面HAfterThrowing逻辑");
     }
 }

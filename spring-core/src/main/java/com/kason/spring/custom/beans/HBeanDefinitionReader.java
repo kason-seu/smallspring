@@ -63,24 +63,28 @@ public class HBeanDefinitionReader {
                 }
             } else if (beanClass.isAnnotationPresent(HAspect.class)) {
 
-                HAopConfig hAopConfig = new HAopConfig();
-                hAopConfig.setAspectClass(beanClass.getSimpleName());
-                Method[] declaredMethods = beanClass.getDeclaredMethods();
 
+                Method[] declaredMethods = beanClass.getDeclaredMethods();
+                HAopConfig hAopConfig = new HAopConfig();
+                hAopConfig.setAspectClass(beanClass.getName());
                 for (Method declaredMethod : declaredMethods) {
+
                     if (declaredMethod.isAnnotationPresent(HBefore.class)) {
                         HBefore declaredAnnotation = declaredMethod.getDeclaredAnnotation(HBefore.class);
                         hAopConfig.setAspectBefore(declaredMethod.getName());
                         hAopConfig.setBeforePointCut(declaredAnnotation.value());
+
                     } else if (declaredMethod.isAnnotationPresent(HAfterReturning.class)) {
                         HAfterReturning declaredAnnotation = declaredMethod.getDeclaredAnnotation(HAfterReturning.class);
                         hAopConfig.setAspectAfterReturning(declaredMethod.getName());
                         hAopConfig.setAfterReturningPointCut(declaredAnnotation.value());
 
+
                     } else if (declaredMethod.isAnnotationPresent(HAfterThrowing.class)) {
                         HAfterThrowing declaredAnnotation = declaredMethod.getDeclaredAnnotation(HAfterThrowing.class);
                         hAopConfig.setAspectAfterThrowing(declaredMethod.getName());
                         hAopConfig.setAfterThrowingPointCut(declaredAnnotation.value());
+
                     }
 
                 }
